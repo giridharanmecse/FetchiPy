@@ -17,12 +17,12 @@ start_time = time.time()
 #contest_name = CONTEST_NAME.lower().strip().replace(' ','-')
 
 # score_array = [3,4,5,6]  # input will be updated soon
-path = "D:\\MiniProject\\FetchiPy\\INPUT"  # path where input is fetched
-output_path = "D:\\MiniProject\\FetchiPy\\OUTPUT"
+path = "/home/osadmin/Documents/fetchipy/FetchiPy/INPUT"  # path where input is fetched
+output_path = "/home/osadmin/Documents/fetchipy/FetchiPy/OUTPUT"
 dir_list = os.listdir(path)
 path_list = []
 for file in dir_list:
-    path_list.append( path+'\\'+file)
+    path_list.append( path+'/'+file)
 for path in path_list:
     print(path)
 
@@ -45,7 +45,7 @@ thin_border = Border(
 )
 
 def fetch_file_name(path):
-    return (path.split("\\")[-1]).split(".")[0]
+    return (path.split("/")[-1]).split(".")[0]
 
 def adjust_column_width(startRow,startCol,maxRow,maxCol,ws):
     dims = {}
@@ -90,7 +90,7 @@ def is_contains_leetcode_ids(string):
     string = str(string).lower()
 
     # return true if cell has string leetcode id
-    return string.__contains__("user") and string.__contains__("id")
+    return string.__contains__("leetcode") and string.__contains__("id")
 
 def get_row_col_position_for_leetcode_names(row_val):
     for col in range(1,sheet_obj.max_column+1):
@@ -158,7 +158,7 @@ for path in path_list:
         leetcode_id_row_start_position = leetcode_id_cell_position[0] + 1  # 4- starts from 1
         leetcode_name_column = get_row_col_position_for_leetcode_names(leetcode_id_cell_position[0])
         max_col = searchMaxCol(leetcode_id_cell_position[0],leetcode_id_column_name)
-        max_row = searchMaxRow(startRow=leetcode_id_cell_position[0],leet_code_id_col=leetcode_id_column_name)
+        max_row = searchMaxRow(startRow=leetcode_id_cell_position[0],leet_code_id_col=leetcode_name_column)
 
         #col_to_fill_valid = max_col + 1
 
@@ -228,13 +228,8 @@ for path in path_list:
                     medium_solved_cell = sheet_obj.cell(row=row_val, column=col_to_fill_medium_solved)
                     hard_solved_cell = sheet_obj.cell(row=row_val, column= col_to_fill_hard_solved)
 
-                    contest_rating_cell = sheet_obj.cell(row=row_val, column= col_to_fill_rating)
-                    contest_attended_cell = sheet_obj.cell(row=row_val, column= col_to_fill_attended)
-                    global_rank_cell = sheet_obj.cell(row=row_val, column=col_to_fill_global_rank)
-                    top_percentage_cell =sheet_obj.cell(row=row_val, column= col_to_fill_top_percentage)
 
-                    new_cells_list = [contest_rating_cell, contest_attended_cell ,global_rank_cell , top_percentage_cell,
-                                      all_solved_cell , easy_solved_cell , medium_solved_cell , hard_solved_cell]
+                    new_cells_list = [all_solved_cell , easy_solved_cell , medium_solved_cell , hard_solved_cell]
 
 
                     # default red for all
@@ -254,7 +249,7 @@ for path in path_list:
                     # default center alignment for ALL
                    # valid_cell.alignment = Alignment(horizontal='center', vertical='center') --> line 225
 
-                    url = f'https://leetcode.com/graphql/?query=query{{ userContestRankingHistory(username: "{curr_name}") {{ attended trendDirection problemsSolved totalProblems finishTimeInSeconds rating ranking contest {{ title startTime }} }} }}'
+                    #url = f'https://leetcode.com/graphql/?query=query{{ userContestRankingHistory(username: "{curr_name}") {{ attended trendDirection problemsSolved totalProblems finishTimeInSeconds rating ranking contest {{ title startTime }} }} }}'
 
                     query = static.solved_count_query
 
@@ -277,7 +272,46 @@ for path in path_list:
                     medium_solved_cell.value = med
                     hard_solved_cell.value = hard
 
-                    # contest raing query
+                   
+
+                    #print('user = '+curr_user_name)
+                    print(f'name :{curr_user_name} solved:{total} ')
+
+                #invalid user
+                except Exception as e:
+                    #resp = requests.get(url).json()['errors'] # if errors is present then that is invalid
+                    # default red for all
+                    #valid_cell.fill = PatternFill(start_color=violet, end_color=violet, fill_type="solid")
+                    
+                    for new_cell in new_cells_list:
+                        new_cell.value = str(e)
+                        new_cell.fill = PatternFill(start_color=violet, end_color=violet, fill_type="solid")
+                    # default NA fill for ALL
+                    #valid_cell.value = 'Invalid ID'
+
+                try:
+                    #cod
+                    contest_rating_cell = sheet_obj.cell(row=row_val, column= col_to_fill_rating)
+                    contest_attended_cell = sheet_obj.cell(row=row_val, column= col_to_fill_attended)
+                    global_rank_cell = sheet_obj.cell(row=row_val, column=col_to_fill_global_rank)
+                    top_percentage_cell =sheet_obj.cell(row=row_val, column= col_to_fill_top_percentage)
+
+                    new_cells_list = [contest_rating_cell, contest_attended_cell ,global_rank_cell , top_percentage_cell]
+
+
+                    # default red for all
+                    #valid_cell.fill = PatternFill(start_color=green, end_color=green, fill_type="solid")
+                    for new_cell in new_cells_list:
+                        new_cell.fill = PatternFill(start_color=green, end_color=green, fill_type="solid")
+                        new_cell.border = thin_border
+                        new_cell.alignment = Alignment(horizontal='center', vertical='center')
+
+
+                    variables = {'username': curr_name}
+
+                    url = 'https://leetcode.com/graphql/'
+
+                     # contest raing query
                     query = static.contest_info_query
                     request2 = requests.post(url, json={'query': query, 'variables': variables})
                     json_data_rating = json.loads( request2 .text)
@@ -296,21 +330,13 @@ for path in path_list:
                     global_rank_cell.value =global_rank_of_user
                     top_percentage_cell.value = top_percentage_of_user
 
-                    #print('user = '+curr_user_name)
-                    print(f'name :{curr_user_name} solved:{total} rating :{contest_rating_of_user}')
 
-                #invalid user
                 except Exception as e:
-                    #resp = requests.get(url).json()['errors'] # if errors is present then that is invalid
-                    # default red for all
-                    #valid_cell.fill = PatternFill(start_color=violet, end_color=violet, fill_type="solid")
                     for new_cell in new_cells_list:
                         new_cell.value = 'Invalid ID'
                         new_cell.fill = PatternFill(start_color=violet, end_color=violet, fill_type="solid")
-                    # default NA fill for ALL
-                    #valid_cell.value = 'Invalid ID'
 
-        def split_processing(items, num_splits=4):
+        def split_processing(items, num_splits=20):
             split_size = len(items) // num_splits
             threads = []
             for i in range(num_splits):
@@ -349,5 +375,5 @@ for path in path_list:
         adjust_column_width(startRow=leetcode_id_cell_position[0], startCol=leetcode_id_cell_position[1],
                             maxRow=max_row, maxCol=col_to_fill_hard_solved, ws=sheet_obj)
 
-    wb_obj.save(output_path+'\\'+wb_name+'- profile details.xlsx') # should be saved because there are multiple workbook objects
+    wb_obj.save(output_path+'/'+wb_name+'- profile details.xlsx') # should be saved because there are multiple workbook objects
 print(time.time() - start_time)
