@@ -284,7 +284,7 @@ for path in path_list:
                     #valid_cell.fill = PatternFill(start_color=violet, end_color=violet, fill_type="solid")
                     
                     for new_cell in new_cells_list:
-                        new_cell.value = str(e)
+                        new_cell.value = 'NA'
                         new_cell.fill = PatternFill(start_color=violet, end_color=violet, fill_type="solid")
                     # default NA fill for ALL
                     #valid_cell.value = 'Invalid ID'
@@ -333,10 +333,10 @@ for path in path_list:
 
                 except Exception as e:
                     for new_cell in new_cells_list:
-                        new_cell.value = 'Invalid ID'
+                        new_cell.value = 'NA'
                         new_cell.fill = PatternFill(start_color=violet, end_color=violet, fill_type="solid")
 
-        def split_processing(items, num_splits=20):
+        def split_processing(items, num_splits=5):
             split_size = len(items) // num_splits
             threads = []
             for i in range(num_splits):
