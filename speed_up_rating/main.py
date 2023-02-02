@@ -336,7 +336,7 @@ for path in path_list:
                         new_cell.value = 'NA'
                         new_cell.fill = PatternFill(start_color=violet, end_color=violet, fill_type="solid")
 
-        def split_processing(items, num_splits=5):
+        def split_processing(items, num_splits=1):
             split_size = len(items) // num_splits
             threads = []
             for i in range(num_splits):
